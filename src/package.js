@@ -15,7 +15,9 @@ import Loader from "./loader.js"
 
 import assign from "./util/assign.js"
 import builtinLookup from "./builtin-lookup.js"
-import { cwd } from "./safe/process.js"
+import {
+  cwd
+} from "./safe/process.js"
 import defaults from "./util/defaults.js"
 import emptyArray from "./util/empty-array.js"
 import errors from "./errors.js"
@@ -38,7 +40,9 @@ import removeFile from "./fs/remove-file.js"
 import setPrototypeOf from "./util/set-prototype-of.js"
 import shared from "./shared.js"
 import toStringLiteral from "./util/to-string-literal.js"
-import { validRange } from "semver"
+import {
+  validRange
+} from "semver"
 
 const {
   APOSTROPHE,
@@ -90,7 +94,11 @@ const defaultOptions = {
   mainFields: ["main"],
   mode: MODE_STRICT,
   sourceMap: void 0,
-  wasm: false
+  wasm: false,
+  alias: [{
+    sourcePath: '',
+    destinationPath: ''
+  }]
 }
 
 const zeroConfigOptions = {
@@ -127,9 +135,11 @@ class Package {
       cachePath = dirPath + sep + "node_modules" + sep + ".cache" + sep + "esm"
     }
 
-    const { dir } = shared.package
+    const {
+      dir
+    } = shared.package
 
-    if (! dir.has(cachePath)) {
+    if (!dir.has(cachePath)) {
       const cache = {
         buffer: null,
         compile: null,
@@ -168,15 +178,15 @@ class Package {
         let json = null
 
         if (hasMetas &&
-            ! isCacheInvalid) {
+          !isCacheInvalid) {
           json = readJSON(cachePath + sep + ".data.json")
 
           isCacheInvalid =
             json === null ||
-            ! has(json, "version") ||
+            !has(json, "version") ||
             json.version !== PACKAGE_VERSION ||
-            ! has(json, "meta") ||
-            ! isObject(json.meta)
+            !has(json, "meta") ||
+            !isObject(json.meta)
         }
 
         if (isCacheInvalid) {
@@ -231,9 +241,13 @@ class Package {
   }
 
   clone() {
-    const { options } = this
+    const {
+      options
+    } = this
     const cjsOptions = options.cjs
-    const cloned = assign({ __proto__: Package.prototype }, this)
+    const cloned = assign({
+      __proto__: Package.prototype
+    }, this)
     const clonedOptions = assign({}, options)
 
     clonedOptions.cjs = assign({}, cjsOptions)
@@ -248,10 +262,12 @@ class Package {
     }
 
     const pkgState = Loader.state.package
-    const { cache } = pkgState
+    const {
+      cache
+    } = pkgState
 
     if (dirPath === "" &&
-        ! cache.has("")) {
+      !cache.has("")) {
       // Set `topLevelReturn` to `true` so that the "Illegal return statement"
       // syntax error will occur within the REPL.
       cache.set("", new Package("", PACKAGE_RANGE, {
@@ -268,18 +284,18 @@ class Package {
       type: void 0
     })
 
-    return result === null
-      ? pkgState.default
-      : result
+    return result === null ?
+      pkgState.default :
+      result
   }
 
   static from(request, forceOptions) {
     let dirPath = "."
 
     if (typeof request === "string") {
-      dirPath = builtinLookup.has(request)
-        ? ""
-        : dirname(request)
+      dirPath = builtinLookup.has(request) ?
+        "" :
+        dirname(request)
     } else {
       dirPath = getModuleDirname(request)
     }
@@ -304,7 +320,9 @@ function clearBabelCache(cachePath) {
 }
 
 function createOptions(value) {
-  const { defaultOptions } = Package
+  const {
+    defaultOptions
+  } = Package
   const names = []
   const options = {}
 
@@ -319,7 +337,7 @@ function createOptions(value) {
         names.push(name)
         options[name] = value[name]
       } else if (name === "sourcemap" &&
-                 possibleNames.indexOf("sourceMap") === -1) {
+        possibleNames.indexOf("sourceMap") === -1) {
         options.sourceMap = value.sourcemap
       } else {
         throw new ERR_UNKNOWN_ESM_OPTION(name)
@@ -344,40 +362,48 @@ function createOptions(value) {
   const awaitOption = options.await
 
   if (isFlag(awaitOption)) {
-    options.await = !! awaitOption
+    options.await = !!awaitOption
   } else {
     throw new ERR_INVALID_ESM_OPTION("await", awaitOption)
   }
 
-  const { cache } = options
+  const {
+    cache
+  } = options
 
   if (isFlag(cache)) {
-    options.cache = !! cache
+    options.cache = !!cache
   } else if (typeof cache !== "string") {
     throw new ERR_INVALID_ESM_OPTION("cache", cache)
   }
 
-  const { debug } = options
+  const {
+    debug
+  } = options
 
   if (isFlag(debug)) {
-    options.debug = !! debug
+    options.debug = !!debug
   } else {
     throw new ERR_INVALID_ESM_OPTION("debug", debug)
   }
 
-  const { force } = options
+  const {
+    force
+  } = options
 
   if (isFlag(force)) {
-    options.force = !! force
+    options.force = !!force
   } else {
     throw new ERR_INVALID_ESM_OPTION("force", cache)
   }
 
   const defaultMainFields = defaultOptions.mainFields
 
-  let { mainFields } = options
+  let {
+    mainFields
+  } = options
 
-  if (! Array.isArray(mainFields)) {
+  if (!Array.isArray(mainFields)) {
     mainFields = [mainFields]
   }
 
@@ -399,25 +425,29 @@ function createOptions(value) {
 
   options.mainFields = mainFields
 
-  const { mode } = options
+  const {
+    mode
+  } = options
 
   if (mode === MODE_ALL ||
-      mode === "all") {
+    mode === "all") {
     options.mode = MODE_ALL
   } else if (mode === MODE_AUTO ||
-             mode === "auto") {
+    mode === "auto") {
     options.mode = MODE_AUTO
   } else if (mode === MODE_STRICT ||
-             mode === "strict") {
+    mode === "strict") {
     options.mode = MODE_STRICT
   } else {
     throw new ERR_INVALID_ESM_OPTION("mode", mode)
   }
 
-  const { sourceMap } = options
+  const {
+    sourceMap
+  } = options
 
   if (isFlag(sourceMap)) {
-    options.sourceMap = !! sourceMap
+    options.sourceMap = !!sourceMap
   } else if (sourceMap !== void 0) {
     throw new ERR_INVALID_ESM_OPTION("sourceMap", sourceMap)
   }
@@ -425,7 +455,7 @@ function createOptions(value) {
   const wasmOption = options.wasm
 
   if (isFlag(wasmOption)) {
-    options.wasm = !! wasmOption
+    options.wasm = !!wasmOption
   } else {
     throw new ERR_INVALID_ESM_OPTION("wasm", wasmOption)
   }
@@ -441,14 +471,14 @@ function createOptionsCJS(value) {
     return assign(options, defaultCJS)
   }
 
-  if (! isObject(value)) {
+  if (!isObject(value)) {
     const names = keys(defaultCJS)
-    const optionsValue = !! value
+    const optionsValue = !!value
 
     for (const name of names) {
-      options[name] = isExplicitName(name)
-        ? false
-        : optionsValue
+      options[name] = isExplicitName(name) ?
+        false :
+        optionsValue
     }
 
     return options
@@ -462,7 +492,7 @@ function createOptionsCJS(value) {
       names.push(name)
       options[name] = value[name]
     } else if (name === "interop" &&
-               possibleNames.indexOf("esModule") === -1) {
+      possibleNames.indexOf("esModule") === -1) {
       options.esModule = value.interop
     } else {
       throw new ERR_UNKNOWN_ESM_OPTION("cjs[" + toStringLiteral(name, APOSTROPHE) + "]")
@@ -475,10 +505,10 @@ function createOptionsCJS(value) {
     const optionsValue = options[name]
 
     if (isFlag(optionsValue)) {
-      const flagValue = !! optionsValue
+      const flagValue = !!optionsValue
 
       if (flagValue &&
-          ! isExplicitName(name)) {
+        !isExplicitName(name)) {
         useZeroConfig = false
       }
 
@@ -492,16 +522,16 @@ function createOptionsCJS(value) {
     }
   }
 
-  const defaultSource = useZeroConfig
-    ? zeroConfigOptions.cjs
-    : defaultCJS
+  const defaultSource = useZeroConfig ?
+    zeroConfigOptions.cjs :
+    defaultCJS
 
   return defaults(options, defaultSource)
 }
 
 function findRoot(dirPath) {
   if (basename(dirPath) === "node_modules" ||
-      isFile(dirPath + sep + PACKAGE_JSON_FILENAME)) {
+    isFile(dirPath + sep + PACKAGE_JSON_FILENAME)) {
     return dirPath
   }
 
@@ -511,14 +541,16 @@ function findRoot(dirPath) {
     return ""
   }
 
-  return basename(parentPath) === "node_modules"
-    ? dirPath
-    : findRoot(parentPath)
+  return basename(parentPath) === "node_modules" ?
+    dirPath :
+    findRoot(parentPath)
 }
 
 function getInfo(dirPath, state) {
   const pkgState = Loader.state.package
-  const { cache } = pkgState
+  const {
+    cache
+  } = pkgState
   const defaultPkg = pkgState.default
 
   let pkg = null
@@ -527,7 +559,7 @@ function getInfo(dirPath, state) {
     pkg = cache.get(dirPath)
 
     if (pkg !== null ||
-        state.forceOptions === void 0) {
+      state.forceOptions === void 0) {
       return pkg
     }
   }
@@ -539,7 +571,7 @@ function getInfo(dirPath, state) {
   }
 
   if (defaultPkg &&
-      defaultPkg.options.force) {
+    defaultPkg.options.force) {
     // Clone the default package to avoid the parsing phase fallback path
     // of module/internal/compile.
     pkg = defaultPkg.clone()
@@ -573,7 +605,9 @@ function getRange(json, name) {
 }
 
 function getRoot(dirPath) {
-  const { root } = shared.package
+  const {
+    root
+  } = shared.package
 
   let cached = root.get(dirPath)
 
@@ -587,22 +621,22 @@ function getRoot(dirPath) {
 
 function isExplicitName(name) {
   return name === "dedefault" ||
-         name === "topLevelReturn"
+    name === "topLevelReturn"
 }
 
 function isFlag(value) {
   return typeof value === "boolean" ||
-         value === 0 ||
-         value === 1
+    value === 0 ||
+    value === 1
 }
 
 function readInfo(dirPath, state) {
   let pkg
   let optionsPath = dirPath + sep + ESMRC_FILENAME
 
-  let options = isFile(optionsPath)
-    ? readFile(optionsPath, "utf8")
-    : null
+  let options = isFile(optionsPath) ?
+    readFile(optionsPath, "utf8") :
+    null
 
   let optionsFound = options !== null
 
@@ -612,20 +646,28 @@ function readInfo(dirPath, state) {
     optionsPath = findPath(optionsPath, emptyArray, false, esmrcExts)
   }
 
-  const { forceOptions } = state
+  const {
+    forceOptions
+  } = state
 
   state.forceOptions = void 0
 
   if (optionsPath !== "" &&
-      ! optionsFound) {
+    !optionsFound) {
     optionsFound = true
 
     if (isExtJSON(optionsPath)) {
       options = readJSON6(optionsPath)
     } else {
-      const { cache } = Loader.state.package
-      const { moduleState } = shared
-      const { parsing } = moduleState
+      const {
+        cache
+      } = Loader.state.package
+      const {
+        moduleState
+      } = shared
+      const {
+        parsing
+      } = moduleState
 
       pkg = new Package(dirPath, RANGE_ALL, {
         cache: Package.createOptions(forceOptions).cache
@@ -645,14 +687,14 @@ function readInfo(dirPath, state) {
 
   const pkgPath = dirPath + sep + PACKAGE_JSON_FILENAME
 
-  let pkgJSON = isFile(pkgPath)
-    ? readFile(pkgPath, "utf8")
-    : null
+  let pkgJSON = isFile(pkgPath) ?
+    readFile(pkgPath, "utf8") :
+    null
 
   let parentPkg
 
   if (forceOptions === void 0 &&
-      pkgJSON === null) {
+    pkgJSON === null) {
     if (optionsFound) {
       parentPkg = getInfo(dirname(dirPath), state)
     } else {
@@ -663,13 +705,13 @@ function readInfo(dirPath, state) {
   let pkgParsed = 0
 
   if (pkgJSON !== null &&
-      ! optionsFound) {
+    !optionsFound) {
     pkgJSON = parseJSON(pkgJSON)
     pkgParsed = pkgJSON === null ? -1 : 1
 
     if (pkgParsed === 1 &&
-        ! optionsFound &&
-        has(pkgJSON, "esm")) {
+      !optionsFound &&
+      has(pkgJSON, "esm")) {
       optionsFound = true
       options = pkgJSON.esm
     }
@@ -683,7 +725,7 @@ function readInfo(dirPath, state) {
     range = parentPkg.range
   } else {
     if (pkgParsed === 0 &&
-        pkgJSON !== null) {
+      pkgJSON !== null) {
       pkgJSON = parseJSON(pkgJSON)
       pkgParsed = pkgJSON === null ? -1 : 1
     }
@@ -699,7 +741,7 @@ function readInfo(dirPath, state) {
 
     if (range === null) {
       if (optionsFound ||
-          getRange(pkgJSON, "devDependencies")) {
+        getRange(pkgJSON, "devDependencies")) {
         range = RANGE_ALL
       } else {
         return null
@@ -713,19 +755,19 @@ function readInfo(dirPath, state) {
   }
 
   if (forceOptions !== void 0 &&
-      ! optionsFound) {
+    !optionsFound) {
     optionsFound = true
     options = forceOptions
   }
 
   if (options === true ||
-      ! optionsFound) {
+    !optionsFound) {
     optionsFound = true
     options = OPTIONS
   }
 
   if (pkgParsed !== 1 &&
-      pkgJSON === null) {
+    pkgJSON === null) {
     dirPath = getRoot(dirPath)
   }
 

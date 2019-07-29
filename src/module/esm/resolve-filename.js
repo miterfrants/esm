@@ -1,4 +1,7 @@
-import { dirname, extname } from "../../safe/path.js"
+import {
+  dirname,
+  extname
+} from "../../safe/path.js"
 
 import CHAR_CODE from "../../constant/char-code.js"
 import ENTRY from "../../constant/entry.js"
@@ -64,7 +67,7 @@ function resolveFilename(request, parent, isMain = false, options) {
   // https://github.com/electron/electron/blob/master/lib/common/reset-search-paths.js
   // https://github.com/brave/muon/blob/master/lib/common/reset-search-paths.js
   if (ELECTRON &&
-      bundledLookup.has(request)) {
+    bundledLookup.has(request)) {
     return SafeModule._resolveFilename(request, parent, isMain, options)
   }
 
@@ -94,7 +97,7 @@ function resolveFilename(request, parent, isMain = false, options) {
   let cache
   let cacheKey
 
-  if (! isObject(options)) {
+  if (!isObject(options)) {
     cache = shared.memoize.moduleESMResolveFilename
 
     cacheKey =
@@ -109,7 +112,7 @@ function resolveFilename(request, parent, isMain = false, options) {
     }
   }
 
-  const isRel = ! isAbs && isRelative(request)
+  const isRel = !isAbs && isRelative(request)
   const isPath = isAbs || isRel
   const pkgOptions = Package.get(fromPath).options
 
@@ -117,23 +120,23 @@ function resolveFilename(request, parent, isMain = false, options) {
   let fields = pkgOptions.mainFields
 
   if (parentEntry !== null &&
-      parentEntry.extname === ".mjs") {
+    parentEntry.extname === ".mjs") {
     cjsPaths = false
     fields = strictFields
   }
 
   let foundPath = ""
 
-  if (! isPath &&
-      (request.charCodeAt(0) === FORWARD_SLASH ||
-       request.indexOf(":") !== -1)) {
+  if (!isPath &&
+    (request.charCodeAt(0) === FORWARD_SLASH ||
+      request.indexOf(":") !== -1)) {
     const parsed = parseURL(request)
 
     foundPath = getFilePathFromURL(parsed)
 
     if (foundPath === "" &&
-        parsed.protocol !== "file:" &&
-        ! localhostRegExp.test(request)) {
+      parsed.protocol !== "file:" &&
+      !localhostRegExp.test(request)) {
       const error = new ERR_INVALID_PROTOCOL(parsed.protocol, "file:")
 
       maybeMaskStackTrace(error, parentEntry)
@@ -147,37 +150,37 @@ function resolveFilename(request, parent, isMain = false, options) {
   } else if (isPath) {
     let pathname = request.replace(queryHashRegExp, "")
 
-    if (! hasEncodedSep(pathname)) {
-      const paths = isAbs
-        ? [""]
-        : [fromPath]
+    if (!hasEncodedSep(pathname)) {
+      const paths = isAbs ? [""] : [fromPath]
 
       let exts
 
-      if (! cjsPaths) {
-        exts = FLAGS.esModuleSpecifierResolution === "explicit"
-          ? emptyArray
-          : strictExts
+      if (!cjsPaths) {
+        exts = FLAGS.esModuleSpecifierResolution === "explicit" ?
+          emptyArray :
+          strictExts
       }
-
+      for (let i = 0; i < options.alias.length; i++) {
+        pathname = pathname.replace(options.alias[i].sourcePath, options.alias[i].destinationPath);
+      }
       pathname = decodeURIComponent(pathname)
       foundPath = findPath(pathname, paths, isMain, fields, exts)
     }
-  } else if (! hasEncodedSep(request)) {
+  } else if (!hasEncodedSep(request)) {
     const decoded = decodeURIComponent(request)
 
     // Prevent resolving non-local dependencies:
     // https://github.com/nodejs/node-eps/blob/master/002-es-modules.md#432-removal-of-non-local-dependencies
-    const skipGlobalPaths = ! cjsPaths
+    const skipGlobalPaths = !cjsPaths
 
-    const exts = cjsPaths
-      ? void 0
-      : strictExts
+    const exts = cjsPaths ?
+      void 0 :
+      strictExts
 
     foundPath = _resolveFilename(decoded, parent, isMain, options, fields, exts, skipGlobalPaths)
 
     if (foundPath === "" &&
-        builtinLookup.has(decoded)) {
+      builtinLookup.has(decoded)) {
       if (cache !== void 0) {
         cache.set(cacheKey, decoded)
       }
@@ -188,10 +191,10 @@ function resolveFilename(request, parent, isMain = false, options) {
 
   if (foundPath !== "") {
     if (cjsPaths ||
-        isMain ||
-        isExtJS(foundPath) ||
-        isExtMJS(foundPath) ||
-        strictExtsLookup.has(extname(foundPath))) {
+      isMain ||
+      isExtJS(foundPath) ||
+      isExtMJS(foundPath) ||
+      strictExtsLookup.has(extname(foundPath))) {
       if (cache !== void 0) {
         cache.set(cacheKey, foundPath)
       }
@@ -235,7 +238,7 @@ function _resolveFilename(request, parent, isMain, options, fields, exts, skipGl
   let paths
 
   if (options &&
-      Array.isArray(options.paths)) {
+    Array.isArray(options.paths)) {
     paths = resolveLookupPathsFrom(request, options.paths, skipGlobalPaths)
   } else {
     paths = resolveLookupPaths(request, parent, skipGlobalPaths)
@@ -249,7 +252,7 @@ function _resolveFilename(request, parent, isMain, options, fields, exts, skipGl
 }
 
 function maybeMaskStackTrace(error, parentEntry) {
-  if (! Loader.state.package.default.options.debug) {
+  if (!Loader.state.package.default.options.debug) {
     const maskOptions = {
       filename: null,
       inModule: false
@@ -261,8 +264,8 @@ function maybeMaskStackTrace(error, parentEntry) {
       maskOptions.filename = parentEntry.filename
 
       maskOptions.inModule =
-        (! parentEntry.package.options.cjs.paths ||
-         parentEntry.extname === ".mjs") &&
+        (!parentEntry.package.options.cjs.paths ||
+          parentEntry.extname === ".mjs") &&
         parentType !== TYPE_CJS &&
         parentType !== TYPE_PSEUDO
     }
