@@ -7,7 +7,9 @@ import Package from "../../package.js"
 
 import _load from "../internal/load.js"
 import builtinLookup from "../../builtin-lookup.js"
-import { dirname } from "../../safe/path.js"
+import {
+  dirname
+} from "../../safe/path.js"
 import dualResolveFilename from "../internal/dual-resolve-filename.js"
 import getURLFromFilePath from "../../util/get-url-from-file-path.js"
 import getURLQueryFragment from "../../util/get-url-query-fragment.js"
@@ -26,7 +28,9 @@ const {
 } = ENTRY
 
 function load(request, parent, isMain = false, preload) {
-  const { parsing } = shared.moduleState
+  const {
+    parsing
+  } = shared.moduleState
   const parentEntry = Entry.get(parent)
   const parentCJS = parentEntry === null ? null : parentEntry.package.options.cjs
   const parentIsMJS = parentEntry === null ? false : parentEntry.extname === ".mjs"
@@ -35,9 +39,9 @@ function load(request, parent, isMain = false, preload) {
   let filename
 
   if (parentEntry !== null &&
-      parentCJS.paths &&
-      ! parentIsMJS) {
-    filename = dualResolveFilename(request, parent, isMain)
+    parentCJS.paths &&
+    !parentIsMJS) {
+    filename = dualResolveFilename(request, parent, isMain, parentEntry.package.options)
   } else {
     filename = resolveFilename(request, parent, isMain)
   }
@@ -45,24 +49,29 @@ function load(request, parent, isMain = false, preload) {
   const fromPath = dirname(filename)
 
   if (fromPath === "." &&
-      builtinLookup.has(filename)) {
+    builtinLookup.has(filename)) {
     request = filename
   }
 
   const pkg = Package.from(filename)
-  const { cjs } = pkg.options
+  const {
+    cjs
+  } = pkg.options
   const queryFragment = getURLQueryFragment(request)
-  const { moduleCache, scratchCache } = Loader.state.module
+  const {
+    moduleCache,
+    scratchCache
+  } = Loader.state.module
 
   let cache = Module._cache
-  let isUnexposed = ! cjs.cache
+  let isUnexposed = !cjs.cache
 
-  request = queryFragment === ""
-    ? filename
-    : getURLFromFilePath(filename) + queryFragment
+  request = queryFragment === "" ?
+    filename :
+    getURLFromFilePath(filename) + queryFragment
 
   if (isExtMJS(filename) ||
-      has(moduleCache, request)) {
+    has(moduleCache, request)) {
     cache = moduleCache
   } else if (parsing) {
     cache = scratchCache
@@ -70,7 +79,7 @@ function load(request, parent, isMain = false, preload) {
     const mod = scratchCache[request]
 
     if (isUnexposed &&
-        Entry.get(mod).type !== TYPE_CJS) {
+      Entry.get(mod).type !== TYPE_CJS) {
       cache = moduleCache
     }
 
@@ -88,16 +97,16 @@ function load(request, parent, isMain = false, preload) {
     }
 
     if (isMain &&
-        isUnexposed) {
+      isUnexposed) {
       Reflect.deleteProperty(realProcess, "mainModule")
     }
 
     if (isCJS &&
-        parentEntry !== null &&
-        (parentIsMJS ||
-         (parentType !== TYPE_CJS &&
+      parentEntry !== null &&
+      (parentIsMJS ||
+        (parentType !== TYPE_CJS &&
           parentType !== TYPE_PSEUDO &&
-          ! parentCJS.cache))) {
+          !parentCJS.cache))) {
       entry.module.parent = void 0
     }
   }
@@ -111,7 +120,7 @@ function load(request, parent, isMain = false, preload) {
       parentEntry.children[entry.name] = entry
     }
 
-    if (! parsing) {
+    if (!parsing) {
       sanitize(entry)
     }
 
@@ -126,8 +135,8 @@ function load(request, parent, isMain = false, preload) {
     sanitize(entry)
   }
 
-  if (! loaderCalled &&
-      typeof preload === "function") {
+  if (!loaderCalled &&
+    typeof preload === "function") {
     preload(entry)
   }
 
